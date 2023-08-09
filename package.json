@@ -1,0 +1,29 @@
+{
+  "name": "0023modulo8practica1",
+  "version": "1.0.0",
+  "description": "Ejercicio práctico de NodeJs Express Sequelize",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/operezedutecno/0023Modulo8Practica1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/operezedutecno/0023Modulo8Practica1/issues"
+  },
+  "homepage": "https://github.com/operezedutecno/0023Modulo8Practica1#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.2",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.32.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
