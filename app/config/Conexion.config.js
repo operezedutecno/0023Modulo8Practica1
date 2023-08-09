@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize")
 
-const conexion = new Sequelize("blog0023", "postgres", "postgres", {
+const conexion = new Sequelize("blog0023", "postgres", "asdasd", {
     dialect: "postgres",
     host: "localhost",
     port: 5432
