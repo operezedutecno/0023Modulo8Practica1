@@ -1,4 +1,5 @@
-
+./app/config/Conexion.config.js
+git
 # Logs
 logs
 *.log
