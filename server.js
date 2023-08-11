@@ -1,21 +1,21 @@
 const express = require("express")
 const app = express()
 const db = require("./app/models/index")
-const jwt = require("node.jwt")
 
 const port = 8000
 app.use(express.json())
 
+const jwt = require("node.jwt")
+const secretKey = jwt.secret('#}.}5_nT3TENO^Z?7q,g<{<&_M4Py4b0(_tY>x1DKk%z[YS/Ik')
+
 /* controllers */
 const userController = require('./app/controllers/user.controller.js')
+const postControllet = require('./app/controllers/post.controller.js')
 
 app.listen(port, async() => {
     await db.conexion.sync()
     console.log("Servidor ejecutando Puerto: "+port);
 })
-
-/* llave secreta */
-const secretKey = jwt.secret('#}.}5_nT3TENO^Z?7q,g<{<&_M4Py4b0(_tY>x1DKk%z[YS/Ik')
 
 /* rutas */
 app.post('/newUser', async (request, response) =>{
@@ -64,26 +64,85 @@ app.get('/listUser', async (request, response) =>{
 })
 
 app.post('/login', async (request, response) =>{
-    console.log(request.body)
-    const {user, password} = request.body
-    
-    if(!user || !password){
-        return response.status(403).json({ success: false, message: "Debe indicar Uuario Y Contraseña" })
+    try{
+        const token = await userController.login(request.body)
+        response.json({ success: true, message: "Autenticación exitosa", token: token})
+    }catch(err){
+        return response.status(403).json({ success: false, message: err})
     }
+})
 
-    const respuesta = await userController.listUsers()
-    const usuarios = JSON.parse(JSON.stringify(respuesta))
-
-    const datosUsuario = usuarios.find(item => item.usuario === user && item.contrasena === password)
-    if(!datosUsuario) {
-        return response.status(403).json({ success: false, message: "Usuario y/o contraseña incorrectos"})
-    }
-    const token = jwt.encode(datosUsuario, secretKey)
-    response.json({ success: true, message: "Autenticación exitosa", token: token})
-})  
 /*
 Crear proyecto Node con Express y Sequelize
 Crear modelos de Usuarios y Posts
 Crear controlador de Usuarios (CRUD y Login)
 Crear controlador de Posts (CRUD) Implementando Json Web Token (JWT)
 */
+
+/* middleware */
+//app.use('/newPost', (request, response, next) =>{
+//    if(request.method === 'POST'){
+//        console.log('asds')
+//        return response.status(403).json({ success: false })
+//    }
+//    next()
+//})
+let conectado = null
+
+app.use((request, response, next) =>{
+    /* obtengo el token */
+    const token = request.headers.authorization
+    const decodeToken = jwt.decode(token, secretKey)
+    if(decodeToken.code !== '000'){
+        return response.status(403).json({ success: false, message: 'Token invalido' })
+    }
+    conectado = decodeToken.payload.id
+    next()
+})
+
+/* rutas post */
+app.post('/newPost', async (request, response) =>{
+    if(!request.body){
+        return response.status(500).json({ success: false, message: 'Debe indicar el post' })
+    }
+    try{
+        const respuesta = await postControllet.createPost(request.body,conectado)
+        return response.json({ success: true, message: 'post registrado' })
+    }catch(err){
+        return response.status(400).json({ success: false, message: 'no se pudo registrar el post' })
+    }
+})
+
+app.patch('/updPost', async (request, response) =>{
+    if(!request.body){
+        return response.status(500).json({ success: false, message: 'Debe indicar el post' })
+    }
+    const {id, titulo, cuerpo} = request.body
+    const objUPD = {titulo: titulo, cuerpo: cuerpo}
+    try{
+        const respuesta = await postControllet.updatePost(objUPD, id, conectado)
+        return response.json({ success: true, message: 'post actualizado' })
+    }catch(err){
+        return response.status(400).json({ success: false, message: err })
+    }
+    
+})
+
+app.delete('/delPost', async (request, response) =>{
+    const {id} = request.body
+    if(!id){
+        return response.status(500).json({ success: false, message: 'Debe indicar el post' })
+    }
+    const respuesta = await postControllet.deletePost(id,conectado)
+    if(respuesta === 1){
+        return response.json({ success: true, message: 'post eliminado' })
+    }else{
+        return response.status(500).json({ success: false, message: 'no se pudo eliminar el post' })
+    }
+    return response.json({ success: true, message: 'post eliminado' })
+})
+
+app.get('/listPost', async (request, response) =>{
+    const respuesta = await postControllet.listPost(conectado)
+    return response.json({ success: true, message: 'listado de Post', data: respuesta })
+})
