@@ -1,10 +1,12 @@
 const db = require("./../models/index")
 const { usuarios } = db
 const jwt = require("node.jwt")
+const bcrypt = require("bcryptjs")
 
 const secret = jwt.secret("blog0023")
 
 exports.crearUsuario = async(datosUsuario) => {
+    datosUsuario.contrasena = await bcrypt.hash(datosUsuario.contrasena, 10)
     const registro = await usuarios.create(datosUsuario)
     return registro
 }
@@ -42,8 +44,12 @@ exports.eliminarUsuario = async (id) => {
 }
 
 exports.login = async (datosUsuario) => {
-    const usuario = await usuarios.findOne({ where: { usuario: datosUsuario.usuario, contrasena: datosUsuario.contrasena}})
+    const usuario = await usuarios.findOne({ where: { usuario: datosUsuario.usuario}})
     if(!usuario) {
+        throw "Usuario y/o contraseña incorrectos"
+    }
+    const validacion = await bcrypt.compare(datosUsuario.contrasena, usuario.contrasena)
+    if(!validacion) {
         throw "Usuario y/o contraseña incorrectos"
     }
     const token = jwt.encode(usuario, secret)
