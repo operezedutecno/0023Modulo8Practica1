@@ -95,6 +95,7 @@ app.post("/login", async(request, response) => {
     }
 })
 
+// Middleware para la ruta "/post"
 // app.use("/posts", (request, response, next) => {
 //     if(request.method === 'GET') {
 //         console.log("Solicitud de listado");
@@ -137,10 +138,23 @@ app.post("/posts", async(request, response) => {
 
 // Actualizar Post
 app.put("/posts/:id", async(request, response) => {
-    response.json({ success: true, message: "Actualización de Post"})
+    try {
+        const id = request.params.id
+        const actualizacion = await postController.actualizarPost(id, request.body, conectado.id)
+        response.json({ success: true, message: "Post actualizado con éxito", data: actualizacion })
+    } catch (error) {
+        response.status(400).json({ success: false, message: error.code ? error.message : error})
+    }
 })
 
 // Eliminar Post
 app.delete("/posts/:id", async(request, response) => {
-    response.json( {success: true, message: "Eliminación de Post"})
+
+    try {
+        const id = request.params.id
+        const eliminacion = await postController.eliminarPost(id, conectado.id)
+        response.json( {success: true, message: "Post eliminado con éxito", data: eliminacion})
+    } catch (error) {
+        response.status(400).json({success: false, message: error.code ? error.message : error})
+    }
 })
