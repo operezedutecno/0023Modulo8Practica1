@@ -1,27 +1,13 @@
 const express = require("express")
 const router = express.Router()
 const postController = require("./../controllers/Post.controller")
-const {validarToken} = require("./../middlewares/validarToken")
+const { verifyToken } = require("./../middlewares/index")
 const jwt = require("node.jwt")
 
-const secret = jwt.secret("blog0023")
-
-let conectado
-
-router.use((request, response, next) => {
-    const token = request.headers.authorization
-    const dataUsuario = validarToken(token)
-    if(dataUsuario.code !== '000') {
-        return response.status(403).json({ success: false, message: "Token inválido" })
-    }
-    conectado = dataUsuario.payload
-    return next();
-})
-
 // Listado de Posts
-router.get("/", async(request, response) => {
+router.get("/", verifyToken, async(request, response) => {
     try {
-        const listado = await postController.listarPosts(conectado.id)
+        const listado = await postController.listarPosts(request.conectado.id)
         response.json({ success: true, message: "Listado de Posts", data: listado})
     } catch (error) {
         response.status(400).json({ success: false, message:"Error en listado de Posts"})
@@ -29,10 +15,10 @@ router.get("/", async(request, response) => {
 })
 
 // Mostrar Post específico
-router.get("/:id", async(request, response) => {
+router.get("/:id", verifyToken, async(request, response) => {
     try {
         const id = request.params.id
-        const post = await postController.consultarPost(id, conectado.id)
+        const post = await postController.consultarPost(id, request.conectado.id)
         response.json({ success: true, message: "Mostrar Post", data: post})
     } catch (error) {
         response.json({ success: false, message: "Error consultando Post"})
@@ -40,9 +26,9 @@ router.get("/:id", async(request, response) => {
 })
 
 // Registrar Post
-router.post("/", async(request, response) => {
+router.post("/", verifyToken, async(request, response) => {
     try {
-        const registro = await postController.crearPost(request.body, conectado.id)
+        const registro = await postController.crearPost(request.body, request.conectado.id)
         response.json({ success: true, message: "Registro de Post", data: registro})
     } catch (error) {
         response.status(400).json({success: false, message: "Error en registro de post"})
@@ -51,10 +37,10 @@ router.post("/", async(request, response) => {
 })
 
 // Actualizar Post
-router.put("/:id", async(request, response) => {
+router.put("/:id", verifyToken, async(request, response) => {
     try {
         const id = request.params.id
-        const actualizacion = await postController.actualizarPost(id, request.body, conectado.id)
+        const actualizacion = await postController.actualizarPost(id, request.body, request.conectado.id)
         response.json({ success: true, message: "Post actualizado con éxito", data: actualizacion })
     } catch (error) {
         response.status(400).json({ success: false, message: error.code ? error.message : error})
@@ -62,11 +48,11 @@ router.put("/:id", async(request, response) => {
 })
 
 // Eliminar Post
-router.delete("/:id", async(request, response) => {
+router.delete("/:id", verifyToken, async(request, response) => {
 
     try {
         const id = request.params.id
-        const eliminacion = await postController.eliminarPost(id, conectado.id)
+        const eliminacion = await postController.eliminarPost(id, request.conectado.id)
         response.json( {success: true, message: "Post eliminado con éxito", data: eliminacion})
     } catch (error) {
         response.status(400).json({success: false, message: error.code ? error.message : error})
