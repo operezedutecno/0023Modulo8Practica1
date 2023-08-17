@@ -10,6 +10,10 @@ app.use(cors({
     origin: "*"
 }))
 
+app.use("/jquery", express.static(`${__dirname}/node_modules/jquery/dist`))
+app.use("/bootstrap", express.static(`${__dirname}/node_modules/bootstrap/dist`))
+app.use("/public", express.static(`${__dirname}/assets`))
+
 const usuarioController = require("./app/controllers/Usuario.controller")
 const postController = require("./app/controllers/Post.controller")
 
