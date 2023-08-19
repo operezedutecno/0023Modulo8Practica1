@@ -27,6 +27,7 @@ router.get("/:id", async (request, response) => {
 // Registro de Usuarios
 router.post("/", async(request, response) => {
     try {
+        console.log(request.body);
         const registro = await usuarioController.crearUsuario(request.body)
         const retorno = JSON.parse(JSON.stringify(registro))
         response.json({success: true, message: "Registro de usuarios", data: retorno})

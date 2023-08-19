@@ -27,6 +27,10 @@ app.get("/", (request, response) => {
     response.sendFile(`${__dirname}/app/views/index.html`)
 })
 
+app.get("/registro", (request, response) => {
+    response.sendFile(`${__dirname}/app/views/registro.html`)
+})
+
 app.use("/usuarios", require("./app/router/Usuario.route"))
 app.use("/posts", require("./app/router/Post.route"))
 
