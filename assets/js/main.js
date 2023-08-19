@@ -21,14 +21,43 @@ $(() => {
 
     $(document).on("click", ".eliminar-usuario", function() {
         const id = $(this).data("id")
-        if(confirm("¿Seguro que desea eliminar este usuario?")) {
-            fetch(`/usuarios/${id}`, { method: 'DELETE'}).then(resp => {
-                alert("Usuario eliminado con éxito");
-            }).catch(error => {
-                alert("Ocurrió un error eliminando el usuario")
-            }).finally(() => {
-                listarUsuarios();
-            })
-        }
+        
+        Swal.fire({
+          title: 'Confirmación',
+          icon: 'info',
+          text: '¿Desea eliminar este usuario?',
+          showCloseButton: true,
+          showCancelButton: true,
+          focusConfirm: false,
+          confirmButtonText:'Aceptar',
+          cancelButtonText:'Cancelar',
+        
+        }).then(resp => {
+            if(resp.isConfirmed) {
+                fetch(`/usuarios/${id}`, { method: 'DELETE'}).then(resp => {
+                    if(resp.status !== 200) {
+                        throw "Ocurrió un error eliminando usuario"
+                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: 'Usuario eliminado con éxito',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Ok'
+                      })
+                }).catch(error => {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Ocurrió un error eliminando el usuario',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                }).finally(() => {
+                    listarUsuarios();
+                })
+            }
+        })
     })
+
+    
 })
