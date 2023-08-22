@@ -1,3 +1,7 @@
 .enlace {
     cursor: pointer;
 }
+
+.actualizar-usuario {
+    width: 24px;
+}
